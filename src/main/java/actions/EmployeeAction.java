@@ -173,26 +173,22 @@ public class EmployeeAction extends ActionBase {
      */
     public void edit() throws ServletException, IOException {
 
-        //管理者かどうかのチェック //追記
-        if (checkAdmin()) { //追記
+        //idを条件に従業員データを取得する
+        EmployeeView ev = service.findOne(toNumber(getRequestParam(AttributeConst.EMP_ID)));
 
-            //idを条件に従業員データを取得する
-            EmployeeView ev = service.findOne(toNumber(getRequestParam(AttributeConst.EMP_ID)));
+        if (ev == null || ev.getDeleteFlag() == AttributeConst.DEL_FLAG_TRUE.getIntegerValue()) {
 
-            if (ev == null || ev.getDeleteFlag() == AttributeConst.DEL_FLAG_TRUE.getIntegerValue()) {
+            //データが取得できなかった、または論理削除されている場合はエラー画面を表示
+            forward(ForwardConst.FW_ERR_UNKNOWN);
+            return;
+        }
 
-                //データが取得できなかった、または論理削除されている場合はエラー画面を表示
-                forward(ForwardConst.FW_ERR_UNKNOWN);
-                return;
-            }
+        putRequestScope(AttributeConst.TOKEN, getTokenId()); //CSRF対策用トークン
+        putRequestScope(AttributeConst.EMPLOYEE, ev); //取得した従業員情報
 
-            putRequestScope(AttributeConst.TOKEN, getTokenId()); //CSRF対策用トークン
-            putRequestScope(AttributeConst.EMPLOYEE, ev); //取得した従業員情報
+        //編集画面を表示する
+        forward(ForwardConst.FW_EMP_EDIT);
 
-            //編集画面を表示する
-            forward(ForwardConst.FW_EMP_EDIT);
-
-        } //追記
     }
 
     /**
